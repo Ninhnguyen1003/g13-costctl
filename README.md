@@ -298,12 +298,7 @@ MIT — see `LICENSE`.
 ---
 
 ## Team
-
-> Replace before submission:
-
-- <name 1>
-- <name 2>
-- <name 3>
+- Nguyễn Quách Khang Ninh
 
 ---
 
