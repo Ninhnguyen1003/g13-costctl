@@ -1,7 +1,7 @@
 # Reflections — G13 costctl
 
-1. Multi-account: To run `costctl` across many accounts I would implement an account loop that assumes a cross-account role in each target account (using `sts:AssumeRole`) and builds a boto3 session per account. The CLI would accept an `--accounts` list or read from a config file. Outputs would be emitted per-account (CSV or JSON) and aggregated centrally; errors and throttling would be captured and retried with backoff.
+1. Multi-account:
+Để chạy costctl trên hàng trăm tài khoản, mình sẽ đổi CLI để lặp qua danh sách tài khoản (từ file config/profile). Cốt lõi là dùng sts:AssumeRole lấy quyền cross-account và tạo boto3 session riêng cho mỗi tài khoản đích. Data xuất ra CSV/JSON theo từng account rồi mới gộp báo cáo. Ngoài ra, bắt buộc phải thêm cơ chế bắt lỗi và retry/backoff cho từng account để tránh dính rate limit của AWS.
 
-2. Clean blast radius & safety: For `clean --apply` I would add an approval step showing counts and requiring a typed confirmation (e.g. type the tag value), restrict by allowed namespaces (only run in personal sandbox accounts), and add a `--max` cap to limit number of deletions. I would also implement a dry-run audit log and an `undo` plan when possible (snapshots for volumes before deletion).
-
-(You can edit these answers before final submission.)
+2. AI assistance:
+AI hỗ trợ khoảng 70% code ban đầu, nhưng mình phải tự "nhúng tay" sửa nhiều để pass test và đúng spec. Cụ thể, mình chủ động code lại các đoạn AI xử lý kém như: format output, AWS exception handling, gộp tag S3, và luồng confirm trước khi terminate. Đặc biệt khi test với moto, AI hay đoán sai mock data nên mình phải tự debug và nắn lại input/output liên tục thì bộ test mới xanh.
