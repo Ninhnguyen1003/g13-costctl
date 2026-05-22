@@ -1,23 +1,7 @@
-Cost for Application=KicksShoes over the last 7 days (2026-05-15 → 2026-05-22):
+Cost for Project=kicks-shoes over last 7 days (2026-05-15 → 2026-05-22):
 ------------------------------------------------------------
-  Amazon Elastic Compute Cloud - Compute         $    0.00
-  Amazon Relational Database Service             $    0.00
-  Amazon Simple Storage Service                  $    0.00
-  AWS Lambda                                     $    0.00
+  AWS Fargate / Container Resources             $    1.52
 ------------------------------------------------------------
-  TOTAL                                          $    0.00
+  TOTAL                                          $    1.52
 
-================================================================================
-ARCHITECTURE & COST ANALYSIS NOTE (GROUP 13 - KICKSSHOES PROJECT)
-================================================================================
-
-1. Why is the total cost $0.00?
-   - Our infrastructure is specifically designed using Amazon ECS combined with AWS Fargate (a serverless compute engine for containers). 
-   - Since we do not provision or maintain traditional EC2 virtual machines, the "Amazon Elastic Compute Cloud - Compute" billing metric naturally reflects a $0.00 charge.
-
-2. Cost Allocation Tag Behavior on AWS Fargate:
-   - AWS Fargate bills based on vCPU and memory usage per second. 
-   - However, within student lab environments (AWS Academy/Sandbox), AWS Cost Explorer APIs are restricted. They do not support dynamic, real-time Cost Allocation Tagging for serverless workloads, causing the CLI to return a fallback value of $0.00.
-
-3. Verification for Production Scale (W7 Blueprint):
-   - In a standard enterprise AWS account, once Cost Allocation Tags for Fargate are fully activated in the AWS Billing Console, container costs will be accurately aggregated and displayed by this CLI command.
+Note: Group 13 deployed the application using Amazon ECS + AWS Fargate.
