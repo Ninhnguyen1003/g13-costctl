@@ -46,7 +46,32 @@ from commands._common import parse_kv
 
 def _find_targets(tag_key, tag_val):
     """Return {"ec2": [...], "volume": [...]} matching tag in non-terminal state."""
-    raise NotImplementedError("TODO: implement _find_targets — see test_clean.py")
+    ec2 = boto3.client("ec2", region_name="us-east-1")
+    targets = {"ec2": [], "volume": []}
+
+    # Instances
+    paginator = ec2.get_paginator("describe_instances")
+    for page in paginator.paginate():
+        for r in page.get("Reservations", []):
+            for inst in r.get("Instances", []):
+                state = inst.get("State", {}).get("Name")
+                if state in ("terminated", "shutting-down"):
+                    continue
+                tags = {t["Key"]: t["Value"] for t in inst.get("Tags", [])}
+                if tags.get(tag_key) == tag_val:
+                    targets["ec2"].append(inst.get("InstanceId"))
+
+    # Volumes: only include 'available' volumes
+    vp = ec2.get_paginator("describe_volumes")
+    for page in vp.paginate():
+        for vol in page.get("Volumes", []):
+            if vol.get("State") != "available":
+                continue
+            tags = {t["Key"]: t["Value"] for t in vol.get("Tags", [])}
+            if tags.get(tag_key) == tag_val:
+                targets["volume"].append(vol.get("VolumeId"))
+
+    return targets
 
 
 def run(args):
@@ -56,4 +81,26 @@ def run(args):
         args.tag    — "key=value" string (REQUIRED)
         args.apply  — bool, must be True to actually delete (default False = dry-run)
     """
-    raise NotImplementedError("TODO: implement run() — see module docstring")
+    key, val = parse_kv(args.tag)
+    targets = _find_targets(key, val)
+    total = sum(len(v) for v in targets.values())
+    if total == 0:
+        print("Nothing to clean")
+        return
+
+    # print plan
+    print(f"Found {len(targets['ec2'])} EC2 and {len(targets['volume'])} volumes to remove (dry-run)")
+    if not args.apply:
+        print("(dry-run — pass --apply to actually delete)")
+        return
+
+    ec2 = boto3.client("ec2", region_name="us-east-1")
+    # terminate instances
+    if targets["ec2"]:
+        ec2.terminate_instances(InstanceIds=targets["ec2"])
+        print("Terminated EC2(s)")
+
+    # delete volumes
+    for vid in targets["volume"]:
+        ec2.delete_volume(VolumeId=vid)
+        print(f"Deleted volume {vid}")
